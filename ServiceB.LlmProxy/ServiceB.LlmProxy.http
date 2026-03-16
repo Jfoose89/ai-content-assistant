@@ -1,0 +1,6 @@
+@ServiceB.LlmProxy_HostAddress = http://localhost:5160
+
+GET {{ServiceB.LlmProxy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
