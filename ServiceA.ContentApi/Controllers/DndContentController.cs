@@ -34,7 +34,7 @@ public class DndContentController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var content = await _contentService.GetByIdAsync(id);
-        return content is null ? NotFound() : Ok(content);
+        return Ok(content);
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class DndContentController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] DndContentRequestDto dto)
     {
         var updated = await _contentService.UpdateAsync(id, dto);
-        return updated is null ? NotFound() : Ok(updated);
+        return Ok(updated);
     }
 
     /// <summary>Deletes a content entry by ID.</summary>
@@ -67,7 +67,7 @@ public class DndContentController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _contentService.DeleteAsync(id);
-        return deleted ? NoContent() : NotFound();
+        await _contentService.DeleteAsync(id);
+        return NoContent();
     }
 }

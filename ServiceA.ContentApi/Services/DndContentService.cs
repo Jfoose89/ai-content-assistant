@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ServiceA.ContentApi.Exceptions;
 using ServiceA.ContentApi.Data;
 using ServiceA.ContentApi.DTOs;
 using ServiceA.ContentApi.Entities;
@@ -43,10 +44,12 @@ public class DndContentService : IDndContentService
         return await query.Select(c => ToDto(c)).ToListAsync();
     }
 
-    public async Task<DndContentResponseDto?> GetByIdAsync(int id)
+    public async Task<DndContentResponseDto> GetByIdAsync(int id)
     {
         var content = await _db.Contents.FindAsync(id);
-        return content is null ? null : ToDto(content);
+        if (content is null)
+            throw new NotFoundException($"Content with ID {id} was not found.");
+        return ToDto(content);
     }
 
     public async Task<DndContentResponseDto> CreateAsync(DndContentRequestDto dto)
@@ -72,10 +75,11 @@ public class DndContentService : IDndContentService
         return ToDto(content);
     }
 
-    public async Task<DndContentResponseDto?> UpdateAsync(int id, DndContentRequestDto dto)
+    public async Task<DndContentResponseDto> UpdateAsync(int id, DndContentRequestDto dto)
     {
         var content = await _db.Contents.FindAsync(id);
-        if (content is null) return null;
+        if (content is null)
+            throw new NotFoundException($"Content with Id {id} was not found.");
 
         var prompt = await BuildPromptAsync(dto);
         var generated = await _llm.GenerateAsync(prompt);
@@ -91,14 +95,14 @@ public class DndContentService : IDndContentService
         return ToDto(content);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var content = await _db.Contents.FindAsync(id);
-        if (content is null) return false;
+        if (content is null)
+            throw new NotFoundException($"Content with ID {id} was not found.");
 
         _db.Contents.Remove(content);
         await _db.SaveChangesAsync();
-        return true;
     }
 
     // ── Prompt builder ────────────────────────────────────────────────────────

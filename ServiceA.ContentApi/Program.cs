@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using ServiceA.ContentApi;
 using ServiceA.ContentApi.Data;
 using ServiceA.ContentApi.Services;
 
@@ -54,7 +55,7 @@ var app = builder.Build();
 
 // ── Middleware pipeline (correct order per assignment) ────────────────────────
 // 1. Exception handling
-app.UseExceptionHandler("/error");
+app.UseMiddleware<ExceptionMiddleware>();
 
 // 2. HTTPS redirect
 app.UseHttpsRedirection();
