@@ -1,32 +1,7 @@
 AI Content Assistant — D&D Content Generator
 A distributed microservices system built with ASP.NET Core (.NET 9), consisting of two cooperating Web APIs that generate atmospheric D&D content using AI. The system integrates with a local D&D SRD Rules Database API to enrich prompts with real stat block data before sending them to HuggingFace for generation.
 
-System Architecture
-Client (Scalar / HTTP)
-        │
-        ▼
-┌─────────────────────────┐
-│   Service A – Port 5001 │  D&D Content API
-│  ┌──────────────────┐   │
-│  │  DndContent      │   │
-│  │  Controller      │   │
-│  └────────┬─────────┘   │
-│           │              │
-│  ┌────────▼─────────┐   │         ┌─────────────────────────┐
-│  │  DndSrdService   │────────────▶│  dnd-srd API – Port 7120│
-│  └──────────────────┘   │         │  (Real SRD stat blocks) │
-│  ┌──────────────────┐   │         └─────────────────────────┘
-│  │  LlmService      │────────────▶┌─────────────────────────┐
-│  └──────────────────┘   │         │  Service B – Port 5002  │  LLM Proxy
-│  ┌──────────────────┐   │         │  ┌───────────────────┐  │
-│  │  EF Core DB      │   │         │  │  HuggingFaceService│  │
-│  │  (In-Memory)     │   │         │  └────────┬──────────┘  │
-│  └──────────────────┘   │         └───────────┼─────────────┘
-└─────────────────────────┘                     │
-                                                 ▼
-                                     HuggingFace Inference API
-                                     (router.huggingface.co)
-How it works
+How It Works
 
 A client sends a POST request to Service A with a D&D category and optional SRD reference
 Service A calls the dnd-srd API to fetch real stat block data (e.g. monster HP, CR, type)
@@ -36,8 +11,13 @@ Service B forwards the prompt to HuggingFace and returns the generated text
 Service A saves the generated content to its in-memory database and returns the result
 
 
-Projects
+Services
 ProjectPort (HTTPS)ResponsibilityServiceA.ContentApi5001CRUD for D&D content, SRD enrichment, proxies generation to Service BServiceB.LlmProxy5002Validates API key, forwards prompts to HuggingFace
+Service A depends on two external services:
+
+dnd-srd API (https://localhost:7120) — provides real SRD stat blocks to enrich prompts
+Service B (http://localhost:5003) — proxies generation requests to HuggingFace
+
 
 Tech Stack
 
@@ -150,37 +130,7 @@ json{
 Status CodeMeaning200OK201Created204No Content400Bad Request — validation error401Unauthorized — missing or invalid API key404Not Found — resource does not exist500Internal Server Error
 
 Project Structure
-AiContentAssistant/
-├── ServiceA.ContentApi/
-│   ├── Controllers/
-│   │   └── DndContentController.cs
-│   ├── Data/
-│   │   └── AppDbContext.cs
-│   ├── DTOs/
-│   │   └── ArticleDtos.cs
-│   ├── Entities/
-│   │   └── DndGeneratedContent.cs
-│   ├── Exceptions/
-│   │   └── AppExceptions.cs
-│   ├── Filters/
-│   │   └── ValidationFilter.cs
-│   ├── Services/
-│   │   ├── IDndContentService.cs
-│   │   ├── DndContentService.cs
-│   │   ├── IDndSrdService.cs (in DndSrdService.cs)
-│   │   ├── DndSrdService.cs
-│   │   ├── ILlmService.cs
-│   │   └── LlmService.cs
-│   ├── ExceptionMiddleware.cs
-│   ├── appsettings.json
-│   └── Program.cs
-│
-└── ServiceB.LlmProxy/
-    ├── Controllers/
-    │   └── LlmController.cs
-    ├── DTOs/
-    │   └── LlmDtos.cs
-    ├── Services/
-    │   └── HuggingFaceService.cs
-    ├── appsettings.json
-    └── Program.cs
+ServiceA.ContentApi
+PathDescriptionControllers/DndContentController.csCRUD endpoints for D&D contentData/AppDbContext.csEF Core In-Memory database contextDTOs/ArticleDtos.csRequest and response DTOsEntities/DndGeneratedContent.csDatabase entityExceptions/AppExceptions.csCustom exception classesFilters/ValidationFilter.csAuto ModelState validation filterServices/DndContentService.csBusiness logic and prompt buildingServices/DndSrdService.csTyped HTTP client for dnd-srd APIServices/LlmService.csTyped HTTP client for Service BExceptionMiddleware.csRFC 7807 custom exception middlewareProgram.csService registration and middleware pipeline
+ServiceB.LlmProxy
+PathDescriptionControllers/LlmController.csGeneration endpoint with API key validationDTOs/LlmDtos.csRequest and response DTOsServices/HuggingFaceService.csTyped HTTP client for HuggingFace APIProgram.csService registration and middleware pipeline
