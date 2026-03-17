@@ -12,7 +12,10 @@ Service A saves the generated content to its in-memory database and returns the 
 
 
 Services
-ProjectPort (HTTPS)ResponsibilityServiceA.ContentApi5001CRUD for D&D content, SRD enrichment, proxies generation to Service BServiceB.LlmProxy5002Validates API key, forwards prompts to HuggingFace
+ServiceA.ContentApi — runs on port 5001
+CRUD for D&D content, SRD enrichment, proxies generation requests to Service B
+ServiceB.LlmProxy — runs on port 5002
+Validates API key, forwards prompts to HuggingFace
 Service A depends on two external services:
 
 dnd-srd API (https://localhost:7120) — provides real SRD stat blocks to enrich prompts
@@ -21,25 +24,31 @@ Service B (http://localhost:5003) — proxies generation requests to HuggingFace
 
 Tech Stack
 
-Framework: ASP.NET Core Web API (.NET 9)
-Database: EF Core In-Memory
-Documentation: Scalar UI
-HTTP Clients: IHttpClientFactory with Typed Clients
-External LLM: HuggingFace Inference API (router.huggingface.co)
-SRD Data: Local dnd-srd API (https://localhost:7120)
-Security: API key validation between services via X-Api-Key header
-Error Handling: Custom Exception Middleware with RFC 7807 ProblemDetails
+-Framework: ASP.NET Core Web API (.NET 9)
+-Database: EF Core In-Memory
+-Documentation: Scalar UI
+-HTTP Clients: IHttpClientFactory with Typed Clients
+-External LLM: HuggingFace Inference API (router.huggingface.co)
+-SRD Data: Local dnd-srd API (https://localhost:7120)
+-Security: API key validation between services via X-Api-Key header
+-Error Handling: Custom Exception Middleware with RFC 7807 ProblemDetails
 
 
 Supported D&D Content Categories
-CategoryDescriptionSRD EnrichmentmonsterAtmospheric monster descriptions for DMsYes — fetches real stat blockspellVivid spell effect descriptionsYes — fetches real spell detailsnpcMemorable NPC with appearance, personality and secretNoadventure-hookIntriguing quest hooks to draw players inNoloreIn-world historical records and lore entriesNo
+
+-monster — Atmospheric monster descriptions for DMs. Fetches real stat block from dnd-srd if an SRD reference is provided.
+-spell — Vivid spell effect descriptions. Fetches real spell details from dnd-srd if an SRD reference is provided.
+-npc — Memorable NPC with appearance, personality and a secret.
+-adventure-hook — Intriguing quest hooks to draw players into a new quest.
+-lore — In-world historical records and lore entries written as if from an ancient tome.
+
 
 Prerequisites
 
-.NET 9 SDK
-Visual Studio 2022
-A free HuggingFace account with an access token
-The dnd-srd API running locally on port 7120
+-.NET 9 SDK
+-Visual Studio 2022
+-A free HuggingFace account with an access token
+-The dnd-srd API running locally on port 7120
 
 
 First-Time Setup
@@ -63,21 +72,37 @@ bash# Terminal 1 — dnd-srd (separate solution)
 cd path/to/dnd-srd && dotnet run
 
 # Terminal 2 — Service A
-cd ServiceA.ContentApi && dotnet run
+-cd ServiceA.ContentApi && dotnet run
 
 # Terminal 3 — Service B
-cd ServiceB.LlmProxy && dotnet run
+-cd ServiceB.LlmProxy && dotnet run
 
 Scalar UI
-ServiceURLService A — D&D Content APIhttps://localhost:5001/scalarService B — LLM Proxy APIhttps://localhost:5002/scalar
+
+-Service A — D&D Content API: https://localhost:5001/scalar
+-Service B — LLM Proxy API: https://localhost:5002/scalar
+
 
 Endpoints
-Service A — D&D Content API
-MethodEndpointDescriptionGET/api/DndContentReturns all content with optional filteringGET/api/DndContent/{id}Returns a single content entry by IDPOST/api/DndContentCreates and generates new D&D contentPUT/api/DndContent/{id}Updates and regenerates an existing entryDELETE/api/DndContent/{id}Deletes a content entry
-Query Parameters for GET /api/DndContent:
-ParameterTypeDescriptioncategorystringFilter by category (monster, spell, npc, etc.)startDatedatetimeFilter entries created after this dateendDatedatetimeFilter entries created before this datesortstringSort order: createdAt, -createdAt, title, -title
+-Service A — D&D Content API
+
+-GET /api/DndContent — Returns all content with optional filtering
+-GET /api/DndContent/{id} — Returns a single content entry by ID
+-POST /api/DndContent — Creates and generates new D&D content
+-PUT /api/DndContent/{id} — Updates and regenerates an existing entry
+-DELETE /api/DndContent/{id} — Deletes a content entry
+
+Query parameters for GET /api/DndContent:
+
+-category — Filter by category (monster, spell, npc, adventure-hook, lore)
+-startDate — Filter entries created after this date
+-endDate — Filter entries created before this date
+-sort — Sort order: createdAt, -createdAt, title, -title
+
 Service B — LLM Proxy API
-MethodEndpointDescriptionAuth RequiredPOST/api/Llm/generateGenerates text via HuggingFaceYes — X-Api-Key
+
+POST /api/Llm/generate — Generates text via HuggingFace (requires X-Api-Key header)
+
 
 Example Requests
 Generate a monster description with SRD enrichment
@@ -127,10 +152,60 @@ json{
   "detail": "Content with ID 999 was not found.",
   "instance": "/api/DndContent/999"
 }
-Status CodeMeaning200OK201Created204No Content400Bad Request — validation error401Unauthorized — missing or invalid API key404Not Found — resource does not exist500Internal Server Error
+Status codes:
+
+-200 — OK
+-201 — Created
+-204 — No Content
+-400 — Bad Request (validation error)
+-401 — Unauthorized (missing or invalid API key)
+-404 — Not Found (resource does not exist)
+-500 — Internal Server Error
+
 
 Project Structure
-ServiceA.ContentApi
-PathDescriptionControllers/DndContentController.csCRUD endpoints for D&D contentData/AppDbContext.csEF Core In-Memory database contextDTOs/ArticleDtos.csRequest and response DTOsEntities/DndGeneratedContent.csDatabase entityExceptions/AppExceptions.csCustom exception classesFilters/ValidationFilter.csAuto ModelState validation filterServices/DndContentService.csBusiness logic and prompt buildingServices/DndSrdService.csTyped HTTP client for dnd-srd APIServices/LlmService.csTyped HTTP client for Service BExceptionMiddleware.csRFC 7807 custom exception middlewareProgram.csService registration and middleware pipeline
+-ServiceA.ContentApi
+Controllers
+
+-DndContentController.cs — CRUD endpoints for D&D content
+
+Data
+
+-AppDbContext.cs — EF Core In-Memory database context
+
+Entities
+
+-DndGeneratedContent.cs — Database entity for generated content
+
+Exceptions
+
+-AppExceptions.cs — Custom exception classes (NotFoundException, ValidationException)
+
+Filters
+
+-ValidationFilter.cs — Automatically validates ModelState before controller actions
+
+Services
+
+-IDndContentService.cs / DndContentService.cs — Business logic and prompt building
+-DndSrdService.cs — Typed HTTP client for fetching SRD data from dnd-srd API
+-ILlmService.cs / LlmService.cs — Typed HTTP client for forwarding prompts to Service B
+
+Root
+
+-ExceptionMiddleware.cs — Catches all unhandled exceptions and returns RFC 7807 ProblemDetails
+-Program.cs — Service registration and middleware pipeline
+
+
 ServiceB.LlmProxy
-PathDescriptionControllers/LlmController.csGeneration endpoint with API key validationDTOs/LlmDtos.csRequest and response DTOsServices/HuggingFaceService.csTyped HTTP client for HuggingFace APIProgram.csService registration and middleware pipeline
+Controllers
+
+-LlmController.cs — Generation endpoint with API key validation
+
+Services
+
+-HuggingFaceService.cs — Typed HTTP client for the HuggingFace Inference API
+
+Root
+
+-Program.cs — Service registration and middleware pipeline
