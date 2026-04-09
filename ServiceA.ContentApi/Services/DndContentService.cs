@@ -19,7 +19,7 @@ public class DndContentService : IDndContentService
         _srd = srd;
     }
 
-    public async Task<IEnumerable<DndContentResponseDto>> GetAllAsync(DndContentFilterDto filter)
+    public async Task<PagedResult<DndContentResponseDto>> GetAllAsync(DndContentFilterDto filter)
     {
         var query = _db.Contents.AsQueryable();
 
@@ -41,7 +41,24 @@ public class DndContentService : IDndContentService
             _ => query.OrderByDescending(c => c.CreatedAt)
         };
 
-        return await query.Select(c => ToDto(c)).ToListAsync();
+        var totalCount = await query.CountAsync();
+
+        var page = Math.Max(1, filter.Page);
+        var pageSize = Math.Clamp(filter.PageSize, 1, 100);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => ToDto(c))
+            .ToListAsync();
+
+        return new PagedResult<DndContentResponseDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<DndContentResponseDto> GetByIdAsync(int id)

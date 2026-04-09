@@ -10,9 +10,9 @@ public class DndContentRequestDto
     public string Title { get; set; } = string.Empty;
 
     /// <summary>Category of D&D content: monster, spell, npc, adventure-hook, lore</summary>
-    [Required]
-    [RegularExpression("monster|spell|npc|adventure-hook|lore",
-        ErrorMessage = "Category must be one of: monster, spell, npc, adventure-hook, lore")]
+    [Required(ErrorMessage = "Category is required.")]
+    [RegularExpression("^(monster|spell|npc|adventure-hook|lore)$",
+    ErrorMessage = "Invalid category. Must be one of: monster, spell, npc, adventure-hook, lore")]
     public string Category { get; set; } = string.Empty;
 
     /// <summary>
@@ -48,11 +48,26 @@ public class DndContentFilterDto
     public string? Category { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-
     /// <summary>Sort field. Prefix with '-' for descending, e.g. "-createdAt".</summary>
     public string? Sort { get; set; }
+    /// <summary>Page number (1-based). Defaults to 1.</summary>
+    public int Page { get; set; } = 1;
+    /// <summary>Number of items per page. Defaults to 10.</summary>
+    public int PageSize { get; set; } = 10;
 }
 
+// Add this at the bottom of the file, after GenerateResponseDto:
+/// <summary>Generic paginated result wrapper.</summary>
+public class PagedResult<T>
+{
+    public IEnumerable<T> Items { get; set; } = [];
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public int TotalCount { get; set; }
+    public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+    public bool HasPreviousPage => Page > 1;
+    public bool HasNextPage => Page < TotalPages;
+}
 /// <summary>Request body sent from Service A to Service B.</summary>
 public class GenerateRequestDto
 {

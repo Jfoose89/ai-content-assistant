@@ -86,7 +86,7 @@ Scalar UI
 Endpoints
 -Service A — D&D Content API
 
--GET /api/DndContent — Returns all content with optional filtering
+-GET /api/DndContent — Returns paginated content with optional filtering and sorting
 -GET /api/DndContent/{id} — Returns a single content entry by ID
 -POST /api/DndContent — Creates and generates new D&D content
 -PUT /api/DndContent/{id} — Updates and regenerates an existing entry
@@ -98,6 +98,8 @@ Query parameters for GET /api/DndContent:
 -startDate — Filter entries created after this date
 -endDate — Filter entries created before this date
 -sort — Sort order: createdAt, -createdAt, title, -title
+-page - Page number (1-based, default: 1)
+-pageSize - Number of items per page (default: 10, max: 100)
 
 Service B — LLM Proxy API
 

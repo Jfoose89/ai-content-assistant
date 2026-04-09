@@ -76,4 +76,11 @@ app.MapScalarApiReference(options =>
     options.Title = "Service A – D&D Content API";
 });
 
+// Seed initial D&D content
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbSeeder.Seed(db);
+}
+
 app.Run();

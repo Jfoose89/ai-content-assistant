@@ -18,13 +18,13 @@ public class DndContentController : ControllerBase
         _contentService = contentService;
     }
 
-    /// <summary>Returns all D&D content entries, with optional filtering and sorting.</summary>
+    /// <summary>Returns all D&D content entries, with optional filtering, sorting, and pagination.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<DndContentResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<DndContentResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] DndContentFilterDto filter)
     {
-        var contents = await _contentService.GetAllAsync(filter);
-        return Ok(contents);
+        var result = await _contentService.GetAllAsync(filter);
+        return Ok(result);
     }
 
     /// <summary>Returns a single content entry by ID.</summary>
