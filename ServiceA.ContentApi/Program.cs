@@ -37,6 +37,7 @@ builder.Services.AddHttpClient<ILlmService, LlmService>(client =>
 
     client.BaseAddress = new Uri(baseUrl);
     client.DefaultRequestHeaders.Add("X-Api-Key", apiKey);
+    client.Timeout = TimeSpan.FromSeconds(35);
 }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
     ServerCertificateCustomValidationCallback =
