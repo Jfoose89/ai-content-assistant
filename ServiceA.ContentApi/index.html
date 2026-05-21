@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D&D Content Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --bg-surface: #141418;
+    --bg-card: #1a1a20;
+    --bg-input: #111115;
+    --border: #2a2a35;
+    --border-hover: #3d3d50;
+    --gold: #c9a84c;
+    --gold-dim: #8a6f2e;
+    --gold-glow: rgba(201,168,76,0.12);
+    --text: #e8e0d0;
+    --text-muted: #8a8070;
+    --text-dim: #5a5548;
+    --red: #8b2020;
+    --green: #1a6b3a;
+    --radius: 6px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    background: var(--bg-surface);
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+
+  header p {
+    color: var(--text-muted);
+    font-size: 15px;
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+  }
+
+  .ornament {
+    color: var(--gold-dim);
+    font-size: 1rem;
+    letter-spacing: 0.5em;
+    margin: 0.5rem 0;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    background: var(--bg-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .sidebar h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
+    font-weight: 400;
+  }
+
+  input[type="text"], select, textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: var(--gold-dim);
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6f2e' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+    cursor: pointer;
+  }
+
+  select option {
+    background: #1a1a20;
+    color: var(--text);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+  }
+
+  .form-group { display: flex; flex-direction: column; }
+
+  .btn-generate {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-generate:hover:not(:disabled) {
+    background: var(--gold-glow);
+    border-color: var(--gold);
+  }
+
+  .btn-generate:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+    max-height: 300px;
+  }
+
+  .history-item {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg-card);
+  }
+
+  .history-item:hover {
+    border-color: var(--gold-dim);
+    background: var(--gold-glow);
+  }
+
+  .history-item .hi-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-item .hi-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .main {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    text-align: center;
+    gap: 0.75rem;
+    padding: 4rem 2rem;
+  }
+
+  .empty-state .es-rune {
+    font-size: 3rem;
+    color: var(--border);
+    font-family: 'Cinzel', serif;
+  }
+
+  .empty-state p {
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  .result-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .result-card.loading {
+    border-color: var(--gold-dim);
+  }
+
+  .result-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .result-header h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gold);
+    flex: 1;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .result-body {
+    padding: 1.25rem;
+  }
+
+  .generated-text {
+    font-family: 'Crimson Text', serif;
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .generated-text h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.15rem;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+  }
+
+  .generated-text em {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .loading-pulse {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  .pulse-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    margin: 0 2px;
+    animation: pulse 1.2s infinite;
+  }
+
+  .pulse-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .pulse-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .error-banner {
+    background: rgba(139,32,32,0.15);
+    border: 1px solid #5a1515;
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    color: #e08080;
+    font-size: 15px;
+    font-style: italic;
+  }
+
+  .result-footer {
+    padding: 0.6rem 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .srd-tag {
+    color: var(--gold-dim);
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="ornament">⸻ ✦ ⸻</div>
+  <h1>D&D Content Generator</h1>
+  <p>Powered by the D&D SRD &amp; HuggingFace Inference API</p>
+  <div class="ornament">⸻ ✦ ⸻</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="form-group">
+      <h2>Generate Content</h2>
+    </div>
+
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" id="title" placeholder="e.g. The Aboleth's Warning" />
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="monster">Monster</option>
+        <option value="spell">Spell</option>
+        <option value="npc">NPC</option>
+        <option value="adventure-hook">Adventure Hook</option>
+        <option value="lore">Lore</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="srdRef">SRD Reference <span style="color:var(--text-dim);font-style:italic;font-size:12px;">(optional)</span></label>
+      <input type="text" id="srdRef" placeholder="e.g. aboleth, fireball" />
+    </div>
+
+    <div class="form-group">
+      <label for="customPrompt">Custom Prompt <span style="color:var(--text-dim);font-style:italic;font-size:12px;">(optional)</span></label>
+      <textarea id="customPrompt" placeholder="Override the auto-generated prompt..."></textarea>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generate()">
+      ✦ &nbsp; Conjure Content
+    </button>
+
+    <hr class="divider" />
+
+    <div class="form-group">
+      <h2>History</h2>
+    </div>
+    <div class="history-list" id="historyList">
+      <p style="font-size:13px;color:var(--text-dim);font-style:italic;">No entries yet.</p>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="empty-state" id="emptyState">
+      <div class="es-rune">✦</div>
+      <p>Fill in the form and conjure your first piece of D&D content.</p>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = 'http://localhost:5000';
+let history = [];
+
+async function generate() {
+  const title = document.getElementById('title').value.trim();
+  const category = document.getElementById('category').value;
+  const srdRef = document.getElementById('srdRef').value.trim();
+  const customPrompt = document.getElementById('customPrompt').value.trim();
+
+  if (!title) {
+    alert('Please enter a title.');
+    return;
+  }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = '⧗  Consulting the arcane...';
+
+  showLoading(title, category);
+
+  try {
+    const body = { title, category };
+    if (srdRef) body.srdReference = srdRef;
+    if (customPrompt) body.customPrompt = customPrompt;
+
+    const res = await fetch(`${API}/api/DndContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || err.title || `Error ${res.status}`);
+    }
+
+    const data = await res.json();
+    showResult(data);
+    addToHistory(data);
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✦ &nbsp; Conjure Content';
+  }
+}
+
+function showLoading(title, category) {
+  document.getElementById('emptyState')?.remove();
+  const main = document.getElementById('main');
+  const old = document.getElementById('activeResult');
+  if (old) old.remove();
+
+  const card = document.createElement('div');
+  card.className = 'result-card loading';
+  card.id = 'activeResult';
+  card.innerHTML = `
+    <div class="result-header">
+      <h2>${esc(title)}</h2>
+      <span class="badge">${esc(category)}</span>
+    </div>
+    <div class="loading-pulse">
+      <div class="pulse-dots"><span></span><span></span><span></span></div>
+      The arcane forces are being consulted...
+    </div>`;
+  main.prepend(card);
+}
+
+function showResult(data) {
+  const card = document.getElementById('activeResult');
+  if (!card) return;
+  card.classList.remove('loading');
+
+  const formatted = formatText(data.generatedText || '');
+  const date = new Date(data.createdAt).toLocaleString();
+
+  card.innerHTML = `
+    <div class="result-header">
+      <h2>${esc(data.title)}</h2>
+      <span class="badge">${esc(data.category)}</span>
+    </div>
+    <div class="result-body">
+      <div class="generated-text">${formatted}</div>
+    </div>
+    <div class="result-footer">
+      <span>${date}</span>
+      ${data.srdReference ? `<span class="srd-tag">✦ SRD: ${esc(data.srdReference)}</span>` : ''}
+    </div>`;
+}
+
+function showError(msg) {
+  const card = document.getElementById('activeResult');
+  if (card) {
+    card.classList.remove('loading');
+    card.innerHTML = `
+      <div class="result-header"><h2>Generation Failed</h2></div>
+      <div class="result-body">
+        <div class="error-banner">${esc(msg)}</div>
+      </div>`;
+  }
+}
+
+function formatText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*_(.+?)_\*/g, '<em>$1</em>')
+    .replace(/_(.+?)_/g, '<em>$1</em>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addToHistory(data) {
+  history.unshift(data);
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) {
+    list.innerHTML = '<p style="font-size:13px;color:var(--text-dim);font-style:italic;">No entries yet.</p>';
+    return;
+  }
+  list.innerHTML = history.map((d, i) => `
+    <div class="history-item" onclick="loadHistoryItem(${i})">
+      <div class="hi-title">${esc(d.title)}</div>
+      <div class="hi-meta">${esc(d.category)}${d.srdReference ? ' · ' + esc(d.srdReference) : ''}</div>
+    </div>`).join('');
+}
+
+function loadHistoryItem(i) {
+  const data = history[i];
+  document.getElementById('emptyState')?.remove();
+  const old = document.getElementById('activeResult');
+  if (old) old.remove();
+
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  card.id = 'activeResult';
+  document.getElementById('main').prepend(card);
+  showResult(data);
+}
+
+async function loadInitialHistory() {
+  try {
+    const res = await fetch(`${API}/api/DndContent?pageSize=20&sort=-createdAt`);
+    if (!res.ok) return;
+    const data = await res.json();
+    history = data.items || [];
+    if (history.length > 0) renderHistory();
+  } catch {}
+}
+
+loadInitialHistory();
+</script>
+</body>
+</html>

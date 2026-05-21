@@ -6,6 +6,17 @@ using ServiceA.ContentApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── CORS ─────────────────────────────────────────────────────────────────────
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:5000", "https://localhost:5001")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // ── Controllers ──────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
 
@@ -57,16 +68,22 @@ var app = builder.Build();
 // 1. Exception handling
 app.UseMiddleware<ExceptionMiddleware>();
 
-// 2. HTTPS redirect
+// 2. Static files (frontend)
+app.UseStaticFiles();
+
+// 3. CORS
+app.UseCors();
+
+// 4. HTTPS redirect
 app.UseHttpsRedirection();
 
-// 3. Routing
+// 5. Routing
 app.UseRouting();
 
-// 4. Auth placeholder
+// 6. Auth placeholder
 app.UseAuthorization();
 
-// 5. Endpoints
+// 7. Endpoints
 app.MapControllers();
 
 // ── Scalar UI ────────────────────────────────────────────────────────────────

@@ -120,6 +120,20 @@ Never pass secrets as command-line arguments or include them in Docker images.
 - Service A — D&D Content API: http://localhost:5000/scalar
 - Service B — LLM Proxy API: http://localhost:5003/scalar
 
+## Frontend UI
+
+A dark fantasy-themed frontend is included and served directly by Service A.
+
+Once Service A is running, navigate to:
+
+- http://localhost:5000/index.html
+
+Features:
+- Generate D&D content by selecting a category, entering a title and optional SRD reference
+- Generated text renders with proper headings, paragraphs and italic DM notes
+- History panel loads previous entries automatically from the database
+- Custom prompt override field for full control over generation
+
 ## Endpoints
 
 ### Service A — D&D Content API
