@@ -7,6 +7,7 @@ namespace ServiceA.ContentApi
     /// <summary>
     /// Custom exception middleware that catches all unhandled exceptions,
     /// logs them, and returns a structured RFC 7807 ProblemDetails response.
+    /// Never leaks API keys, internal service URLs, or reqeust headers.
     /// </summary>
 
     public class ExceptionMiddleware
@@ -35,23 +36,51 @@ namespace ServiceA.ContentApi
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var (statusCode, title) = exception switch
+            var (statusCode, title, detail) = exception switch
             {
-                NotFoundException   => (StatusCodes.Status404NotFound, "Resource Not Found"),
-                ValidationException => (StatusCodes.Status400BadRequest, "Validation Failed"),
-                _                   => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+                NotFoundException   => 
+                    (StatusCodes.Status404NotFound, 
+                    "Resource Not Found",
+                    exception.Message),
+
+                ValidationException => 
+                    (StatusCodes.Status400BadRequest, 
+                    "Validation Failed",
+                    exception.Message),
+                
+                HttpRequestException hre when hre.StatusCode.HasValue =>
+                    ((int)hre.StatusCode.Value switch
+                    {
+                        401 or 403 => StatusCodes.Status502BadGateway,
+                        429        => StatusCodes.Status429TooManyRequests,
+                        >= 500     => StatusCodes.Status502BadGateway,
+                        _          => StatusCodes.Status502BadGateway
+                    },
+                    "AI Service Error",
+                    "The AI service returned an error. Please try again later."),
+
+                TaskCanceledException =>
+                    (StatusCodes.Status504GatewayTimeout,
+                    "AI Service Timeout",
+                    "The request to the AI service timed out. Please try again"),
+
+                _ =>
+                    (StatusCodes.Status500InternalServerError,
+                    "InternalServerError",
+                    "An unexpected error occurred.")
+
             };
 
             var problemDetails = new ProblemDetails
             {
                 Status      = statusCode,
                 Title       = title,
-                Detail      = exception.Message,
+                Detail      = detail,
                 Instance    = context.Request.Path
             };
 
             context.Response.StatusCode     = statusCode;
-            context.Response.ContentType    = "application/prolem+json";
+            context.Response.ContentType    = "application/problem+json";
 
             var json = JsonSerializer.Serialize(problemDetails);
             await context.Response.WriteAsync(json);
