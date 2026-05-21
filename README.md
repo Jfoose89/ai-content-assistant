@@ -47,7 +47,6 @@ Service A depends on two external services:
 - .NET 9 SDK
 - Visual Studio 2022
 - A free HuggingFace account with an access token
-- The dnd-srd API running locally on port 7120
 
 ## First-Time Setup
 
@@ -67,17 +66,21 @@ dotnet user-secrets set "HuggingFace:ApiToken" "hf_your_token_here"
 
 The ServiceB:ApiKey is a shared secret you invent — it must match in both services. Service B uses it to verify that requests are coming from Service A.
 
-### 4. Run all three services
-Start the dnd-srd API first, then start this solution.
+### 4. Run the services
 In Visual Studio: right-click the solution → Properties → Multiple Startup Projects → set both ServiceA.ContentApi and ServiceB.LlmProxy to Start.
 
 Or in separate terminals:
-Terminal 1 — dnd-srd (separate solution)
-cd path/to/dnd-srd && dotnet run
-Terminal 2 — Service A
+Terminal 1 — Service A
 cd ServiceA.ContentApi && dotnet run
-Terminal 3 — Service B
+Terminal 2 — Service B
 cd ServiceB.LlmProxy && dotnet run
+
+Note: the dnd-srd API is no longer required. Monster and spell SRD data is bundled directly into ServiceA as a local JSON file.
+In the Scalar UI section, the dnd-srd URL reference can stay as is since it's about ServiceA and ServiceB only.
+In the Tech Stack section, replace:
+- SRD Data: Local dnd-srd API (https://localhost:7120)
+with:
+- SRD Data: Bundled JSON seed file (srd-data.json) — no external service required
 
 ## API Key Security
 

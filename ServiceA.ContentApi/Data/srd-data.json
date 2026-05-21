@@ -1,0 +1,167 @@
+{
+  "monsters": [
+    {
+      "id": 1,
+      "name": "Goblin",
+      "size": "Small",
+      "alignment": "Neutral Evil",
+      "hitPoints": 7,
+      "challengeRating": 0.25,
+      "monsterTypeName": "Humanoid"
+    },
+    {
+      "id": 2,
+      "name": "Skeleton",
+      "size": "Medium",
+      "alignment": "Lawful Evil",
+      "hitPoints": 13,
+      "challengeRating": 0.25,
+      "monsterTypeName": "Undead"
+    },
+    {
+      "id": 3,
+      "name": "Zombie",
+      "size": "Medium",
+      "alignment": "Neutral Evil",
+      "hitPoints": 22,
+      "challengeRating": 0.25,
+      "monsterTypeName": "Undead"
+    },
+    {
+      "id": 4,
+      "name": "Young Red Dragon",
+      "size": "Large",
+      "alignment": "Chaotic Evil",
+      "hitPoints": 178,
+      "challengeRating": 10,
+      "monsterTypeName": "Dragon"
+    },
+    {
+      "id": 5,
+      "name": "Troll",
+      "size": "Large",
+      "alignment": "Chaotic Evil",
+      "hitPoints": 84,
+      "challengeRating": 5,
+      "monsterTypeName": "Humanoid"
+    },
+    {
+      "id": 6,
+      "name": "Imp",
+      "size": "Tiny",
+      "alignment": "Lawful Evil",
+      "hitPoints": 10,
+      "challengeRating": 1,
+      "monsterTypeName": "Fiend"
+    },
+    {
+      "id": 7,
+      "name": "Giant Spider",
+      "size": "Large",
+      "alignment": "Unaligned",
+      "hitPoints": 26,
+      "challengeRating": 1,
+      "monsterTypeName": "Beast"
+    },
+    {
+      "id": 8,
+      "name": "Orc",
+      "size": "Medium",
+      "alignment": "Chaotic Evil",
+      "hitPoints": 15,
+      "challengeRating": 0.5,
+      "monsterTypeName": "Humanoid"
+    },
+    {
+      "id": 9,
+      "name": "Aboleth",
+      "size": "Large",
+      "alignment": "Lawful Evil",
+      "hitPoints": 135,
+      "challengeRating": 10,
+      "monsterTypeName": "Aberration"
+    }
+  ],
+  "spells": [
+    {
+      "id": 1,
+      "name": "Fireball",
+      "level": 3,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "150 feet",
+      "duration": "Instantaneous",
+      "className": "Wizard"
+    },
+    {
+      "id": 2,
+      "name": "Magic Missile",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "120 feet",
+      "duration": "Instantaneous",
+      "className": "Wizard"
+    },
+    {
+      "id": 3,
+      "name": "Invisibility",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "duration": "1 hour",
+      "className": "Wizard"
+    },
+    {
+      "id": 4,
+      "name": "Cure Wounds",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "Touch",
+      "duration": "Instantaneous",
+      "className": "Cleric"
+    },
+    {
+      "id": 5,
+      "name": "Sacred Flame",
+      "level": 0,
+      "school": "Evocation",
+      "castingTime": "1 action",
+      "range": "60 feet",
+      "duration": "Instantaneous",
+      "className": "Cleric"
+    },
+    {
+      "id": 6,
+      "name": "Shield",
+      "level": 1,
+      "school": "Abjuration",
+      "castingTime": "1 reaction",
+      "range": "Self",
+      "duration": "1 round",
+      "className": "Wizard"
+    },
+    {
+      "id": 7,
+      "name": "Detect Magic",
+      "level": 1,
+      "school": "Divination",
+      "castingTime": "1 action",
+      "range": "Self",
+      "duration": "10 minutes",
+      "className": "Wizard"
+    },
+    {
+      "id": 8,
+      "name": "Healing Word",
+      "level": 1,
+      "school": "Evocation",
+      "castingTime": "1 bonus action",
+      "range": "60 feet",
+      "duration": "Instantaneous",
+      "className": "Cleric"
+    }
+  ]
+}

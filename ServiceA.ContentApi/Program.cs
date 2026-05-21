@@ -44,18 +44,8 @@ builder.Services.AddHttpClient<ILlmService, LlmService>(client =>
         HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
 });
 
-// ── Typed HTTP Client → dnd-srd API ──────────────────────────────────────────
-builder.Services.AddHttpClient<IDndSrdService, DndSrdService>(client =>
-{
-    var baseUrl = builder.Configuration["DndSrd:BaseUrl"]
-        ?? "https://localhost:7120";
-
-    client.BaseAddress = new Uri(baseUrl);
-}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback =
-        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-});
+// ── SRD Data (local JSON file) ──────────────────────────────────────────
+builder.Services.AddSingleton<IDndSrdService, DndSrdService>();
 
 // ── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IDndContentService, DndContentService>();
