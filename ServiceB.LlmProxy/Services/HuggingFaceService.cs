@@ -62,21 +62,35 @@ public class HuggingFaceService : IHuggingFaceService
         };
 
         HttpResponseMessage response;
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         try
         {
             response = await _httpClient.PostAsJsonAsync(
                 "/v1/chat/completions",
                 requestBody);
+
+            stopwatch.Stop();
+            _logger.LogInformation(
+                "HuggingFace request completed with status {StatusCode} in {ElapsedMs}ms",
+                (int)response.StatusCode,
+                stopwatch.ElapsedMilliseconds);
         }
         catch (TaskCanceledException)
         {
-            _logger.LogWarning("HuggingFace request timed out.");
+            stopwatch.Stop();
+            _logger.LogWarning(
+                "HuggingFace request timed out after {ElapsedMs}ms.",
+                stopwatch.ElapsedMilliseconds);
             throw new HuggingFaceException("The AI service timed out. Please try again.", 504);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning("HuggingFace HTTP request failed: {Message}", ex.Message);
+            stopwatch.Stop();
+            _logger.LogWarning(
+                "HuggingFace HTTP request failed after {ElapsedMs}ms: {Message}",
+                stopwatch.ElapsedMilliseconds,
+                ex.Message);
             throw new HuggingFaceException("Could not reach the AI service.", 502);
         }
 

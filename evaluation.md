@@ -123,6 +123,41 @@ directly so the model generates a character consistent with what was requested.
 
 ---
 
+## Test 4 — Lore with No SRD Reference
+
+**Request:**
+- Title: Dragons
+- Category: lore
+- SRD Reference: none
+
+**What the prompt included:**
+No SRD data was available — the model relied entirely on the structured prompt instructions
+and the system prompt rules. The lore category instructs the model to write as an excerpt
+from an in-world historical tome or ancient record.
+
+**Generated output summary:**
+The model produced a heading ("From the Chroniclers of Eldrador"), two substantial paragraphs
+covering the mythological account of the Primordials and the Great Devouring, and a closing
+DM note. Latency was 736ms as measured by the new stopwatch logging added to HuggingFaceService.
+
+**What was good:**
+- The in-world tome framing was followed precisely — archaic, scholarly tone throughout
+- The closing note hinting at unreliable narration ("the ink fading into obscurity") was
+  atmospheric and fit the lore category well
+- The DM note was narrative-focused rather than mechanical, consistent with the lore format
+- Response was within the 150–250 word target
+
+**What was bad:**
+- The connection to dragons specifically was thin — the Primordials account felt more like
+  general cosmological lore than dragon-specific history
+- "The Great Devouring" is invented lore with no basis in official 5e canon, though this is
+  expected and acceptable for the lore category
+
+**What was changed after this test:**
+No prompt changes made. The lore category performs well for atmospheric world-building.
+For more focused results, the title should be passed directly into the user prompt
+(e.g. "Write a lore entry about: {title}") — the same improvement identified in Test 3.
+
 ## Prompt Techniques Used
 
 The following concrete prompt engineering techniques were applied in this project:
