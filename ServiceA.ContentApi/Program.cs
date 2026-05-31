@@ -11,7 +11,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5000", "https://localhost:5001")
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -55,7 +55,7 @@ builder.WebHost.UseUrls("https://localhost:5001", "http://localhost:5000");
 
 var app = builder.Build();
 
-// ── Middleware pipeline (correct order per assignment) ────────────────────────
+// ── Middleware pipeline ────────────────────────
 // 1. Exception handling
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -65,16 +65,13 @@ app.UseStaticFiles();
 // 3. CORS
 app.UseCors();
 
-// 4. HTTPS redirect
-app.UseHttpsRedirection();
-
-// 5. Routing
+// 4. Routing
 app.UseRouting();
 
-// 6. Auth placeholder
+// 5. Auth placeholder
 app.UseAuthorization();
 
-// 7. Endpoints
+// 6. Endpoints
 app.MapControllers();
 
 // ── Scalar UI ────────────────────────────────────────────────────────────────
